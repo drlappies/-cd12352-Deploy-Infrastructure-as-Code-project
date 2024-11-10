@@ -1,0 +1,10 @@
+[
+  {
+    "ParameterKey": "S3BucketName",
+    "ParameterValue": "26459bd8-9f4e-11ef-be57-767df51fc48b"
+  },
+  {
+    "ParameterKey": "NetworkStackName",
+    "ParameterValue": "udagram-network"
+  }
+]
