@@ -1,0 +1,1 @@
+aws s3 cp ./main/public/index.html s3://26459bd8-9f4e-11ef-be57-767df51fc48b/index.html --region=ap-southeast-1

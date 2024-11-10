@@ -2,7 +2,7 @@ Parameters:
   S3BucketName:
     Type: String
     Default: "26459bd8-9f4e-11ef-be57-767df51fc48b"
-  
+
   NetworkStackName:
     Type: String
     Default: "udagram-network"
@@ -29,13 +29,14 @@ Resources:
           FromPort: 80
           ToPort: 80
           CidrIp: "0.0.0.0/0"
-      
+
   EC2LaunchTemplate:
     Type: AWS::EC2::LaunchTemplate
     Properties:
       LaunchTemplateData:
         InstanceType: "t2.micro"
         ImageId: "ami-03fa85deedfcac80b"
+        KeyName: "udagram-app"
         SecurityGroupIds:
           - !GetAtt EC2SecurityGroup.GroupId
         IamInstanceProfile:
@@ -45,6 +46,12 @@ Resources:
             #!/bin/bash
             apt-get update -y
             sudo apt-get install nginx -y
+            apt-get install unzip -y
+            curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            unzip awscliv2.zip
+            sudo ./aws/install
+            aws --version
+            aws s3 cp s3://26459bd8-9f4e-11ef-be57-767df51fc48b/index.html /var/www/html/index.html
             service nginx start
 
   EC2InstanceRole:
@@ -56,8 +63,8 @@ Resources:
           - Effect: "Allow"
             Action: "sts:AssumeRole"
             Principal:
-              Service: 
-              - "ec2.amazonaws.com"
+              Service:
+                - "ec2.amazonaws.com"
       Policies:
         - PolicyName: "EC2S3Policy"
           PolicyDocument:
@@ -65,7 +72,7 @@ Resources:
             Statement:
               - Effect: "Allow"
                 Action: ["s3:GetObject", "s3:PutObject"]
-                Resource: !Sub "arn:aws:s3:::${S3BucketName}/*"
+                Resource: !Sub "arn:aws:s3:::26459bd8-9f4e-11ef-be57-767df51fc48b/*"
 
   EC2InstanceProfile:
     Type: AWS::IAM::InstanceProfile
@@ -87,16 +94,6 @@ Resources:
       DesiredCapacity: "1"
       TargetGroupARNs:
         - Ref: ALBTargetGroup
-
-  S3Bucket:
-    Type: AWS::S3::Bucket
-    Properties:
-      BucketName: !Ref S3BucketName
-      PublicAccessBlockConfiguration:
-        BlockPublicAcls: false
-        IgnorePublicAcls: false
-        BlockPublicPolicy: false
-        RestrictPublicBuckets: false
 
   ALB:
     Type: AWS::ElasticLoadBalancingV2::LoadBalancer
@@ -136,7 +133,7 @@ Resources:
       Protocol: HTTP
       Port: 80
       HealthCheckProtocol: HTTP
-      HealthCheckPath: /health
+      HealthCheckPath: /
       Matcher:
         HttpCode: "200"
 
